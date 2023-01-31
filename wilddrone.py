@@ -4,20 +4,22 @@ import utm
 import math
 
 class WildDrone():
-	drone = System()
+	#drone = System(mavsdk_server_address='10.4.70.182', port=50051)
+	drone = System(mavsdk_server_address='192.168.43.60', port=50051)
 	meteorology = True
 	host = ""
 	lat_home = 0
 	lon_home = 0
 	alt_home = 0
 	
-	def __init__(self, url):
-		self.host = url
+	def __init__(self):
+		None
 		
 	async def default(self):
-		await self.drone.connect(system_address=self.host)
+		await self.drone.connect(system_address="udp://:14540")
+		print("connection ok")
 		self.lat_home, self.lon_home, self.alt_home = await self.position()
-
+  
 	async def position(self):
 		async for info in self.drone.telemetry.position():
 			lat = info.latitude_deg
@@ -58,7 +60,7 @@ class WildDrone():
 		else:
 			print("bad weather")
 
-	async def goto_point(self, lat, lon, eps):
+	async def goto_point(self, lat, lon, eps=0.1):
 		x, y, z = await self.position()
 		await self.drone.action.goto_location(lat, lon, z, 0)
 		dist = eps*2
